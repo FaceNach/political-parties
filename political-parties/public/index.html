@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="../public/favicon.ico" />
+    <title>Websocket Client</title>
+  </head>
+  <body>
+    <h1>Status</h1>
+    <p id="status">Connecting</p>
+
+    <button id="btn-disconnect">Disconnect</button>
+    <button id="btn-connect">Connect</button>
+
+    <form id="message-form" style="display: none">
+      <h1>Messages</h1>
+      <input type="text" id="input-message" placeholder="Message..." />
+      <button id="btn-send">Send</button>
+    </form>
+    <ul id="messages"></ul>
+
+    <script>
+      //Crear coockies
+      const session = {
+        id: 1,
+        sessionId: "ABC123",
+      };
+
+      const jwt = "MiToken-JWT";
+      
+      document.cookie = `session=${JSON.stringify(session)}`;
+      document.cookie = `X-Token=${jwt}`;
+
+      const status = document.querySelector("#status");
+      const messageForm = document.querySelector("#message-form");
+      const messageInput = document.querySelector("#input-message");
+      const messagesContainer = document.querySelector("#messages");
+
+      const btnDisconnect = document.querySelector("#btn-disconnect");
+      const btnConnect = document.querySelector("#btn-connect");
+      const btnSend = document.querySelector("#btn-send");
+
+      //console.log({status, messageForm, messageInput, messagesContainer, btnConnect, btnDisconnect, btnSend})
+
+      const createWebsocket = () => {
+        const channelId = "my-channel";
+
+        const socket = new WebSocket(
+          `ws://localhost:3200?channelId=${channelId}`,
+        );
+
+        socket.onopen = () => {
+          console.log("Websocket connected");
+
+          messageForm.style.display = "block";
+          status.textContent = "Connected";
+        };
+
+        socket.onclose = () => {
+          console.log("Websocket disconnected");
+          messageForm.style.display = "none";
+          status.textContent = "Disconnected";
+        };
+
+        socket.onerror = (event) => {
+          console.log({ error: event });
+        };
+
+        socket.onmessage = (event) => {
+          // console.log({event});
+
+          showMessage(event.data);
+        };
+
+        return socket;
+      };
+
+      let socket = createWebsocket();
+
+      btnDisconnect.addEventListener("click", () => {
+        if (socket.readyState !== WebSocket.OPEN) {
+          return;
+        }
+
+        socket.close();
+      });
+
+      btnConnect.addEventListener("click", () => {
+        if (socket.readyState === WebSocket.OPEN) {
+          return;
+        }
+
+        socket = createWebsocket();
+      });
+
+      messageForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        if (!messageInput.value && messageInput.value.length === 0) return;
+
+        socket.send(messageInput.value);
+        messageInput.value = "";
+      });
+
+      const showMessage = (message) => {
+        const li = document.createElement("li");
+        li.textContent = message;
+        messagesContainer.prepend(li);
+      };
+    </script>
+  </body>
+</html>
