@@ -51,8 +51,14 @@ class PartyService {
     return party;
   }
 
-  delete(id: string): void {
-    this.PartiesStore.removeParty(id);
+  delete(id: string): boolean {
+    if (!id) return false;
+
+    const deleted = this.PartiesStore.removeParty(id);
+
+    if (!deleted) return false;
+
+    return true;
   }
 
   incrementVotes(id: string): PoliticalParty | null {
