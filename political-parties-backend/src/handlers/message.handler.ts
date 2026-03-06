@@ -14,7 +14,7 @@ const createErrorResponse = (error: string): WebSocketResponse => {
 
 //Specific Handlers
 
-const handleAddParty = (
+export const handleAddParty = (
   payload: MessageParsed["payload"],
 ): WebSocketResponse => {
   if (!payload?.name || !payload.color || !payload.borderColor) {
@@ -53,7 +53,9 @@ const handleUpdateParty = (
     payload: updatedParty,
   };
 };
-const handleDeleteParty = (payload: MessageParsed["payload"]): WebSocketResponse => {
+const handleDeleteParty = (
+  payload: MessageParsed["payload"],
+): WebSocketResponse => {
   if (!payload?.id) return createErrorResponse("Id its mandatory");
 
   const deleted = partyService.delete(payload.id);
@@ -71,7 +73,9 @@ const handleDeleteParty = (payload: MessageParsed["payload"]): WebSocketResponse
   };
 };
 
-const handleIncrementVotes = (payload: MessageParsed["payload"]): WebSocketResponse => {
+const handleIncrementVotes = (
+  payload: MessageParsed["payload"],
+): WebSocketResponse => {
   if (!payload?.id) return createErrorResponse("Id its mandatory");
 
   const party = partyService.incrementVotes(payload.id);
@@ -85,7 +89,9 @@ const handleIncrementVotes = (payload: MessageParsed["payload"]): WebSocketRespo
   };
 };
 
-const handleDecrementVotes = (payload: MessageParsed["payload"]): WebSocketResponse => {
+const handleDecrementVotes = (
+  payload: MessageParsed["payload"],
+): WebSocketResponse => {
   if (!payload?.id) return createErrorResponse("Id its mandatory");
 
   const party = partyService.decrementVotes(payload.id);
@@ -95,13 +101,11 @@ const handleDecrementVotes = (payload: MessageParsed["payload"]): WebSocketRespo
   }
   return {
     type: "VOTES_UPDATED",
-    payload: {
-      name: "Decremented votes Party",
-    },
+    payload: party,
   };
 };
 
-const handleGetParties = (): WebSocketResponse => {
+export const handleGetParties = (): WebSocketResponse => {
   return {
     type: "PARTIES_LIST",
     payload: partyService.getAll(),
